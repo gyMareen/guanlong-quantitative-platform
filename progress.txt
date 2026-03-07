@@ -1,0 +1,293 @@
+# 官龙量化一体化交易平台 - 开发进度记录
+
+## 项目信息
+- 项目名称: 官龙量化一体化交易平台
+- 开始日期: 2026-03-08
+- 技术栈: Java 17 + Python 3.10 + Vue 3 + PostgreSQL + Kafka + Redis
+
+---
+
+## [T001] 项目基础结构搭建 - 2026-03-08
+
+### 完成内容
+- 创建项目目录结构
+- 创建前端 Vue 3 项目基础结构
+- 创建后端 Spring Boot 项目基础结构
+- 配置 MyBatis-Plus、Redis、Security
+- 实现统一响应封装和全局异常处理
+- 创建数据库初始化脚本
+- 实现用户认证功能（JWT）
+
+### 修改文件
+- backend/pom.xml
+- backend/src/main/java/com/longport/platform/**
+- frontend/package.json
+- frontend/src/**
+- README.md
+- CLAUDE.md
+- task.json
+- architecture.md
+
+### 备注
+项目基础结构已完成，需要根据量化交易平台需求调整目录结构
+
+---
+
+## [T002] 基础设施 Docker Compose 配置 - 2026-03-08
+
+### 完成内容
+- 创建 infra/compose/local.yml（开发环境配置）
+- 创建 infra/compose/prod.yml（生产环境配置）
+- 创建 infra/compose/.env（环境变量模板）
+- 配置 PostgreSQL 14 服务（含健康检查）
+- 配置 Redis 7 服务（含持久化）
+- 配置 Kafka + Zookeeper 集群
+- 配置 Prometheus 监控
+- 配置 Grafana 可视化
+- 配置 Kafka UI 管理界面
+- 创建 Grafana 数据源和仪表盘配置
+- 创建 infra/compose/start.sh 启动脚本
+
+### 修改文件
+- infra/compose/local.yml
+- infra/compose/prod.yml
+- infra/compose/.env
+- infra/config/prometheus.yml
+- infra/config/grafana/provisioning/datasources/datasources.yml
+- infra/config/grafana/provisioning/dashboards/dashboards.yml
+- infra/config/grafana/provisioning/dashboards/trading-dashboard.json
+- infra/compose/start.sh
+
+### 备注
+- 开发环境使用 local.yml，生产环境使用 prod.yml
+- 启动脚本支持 start/stop/restart/status/logs/init 命令
+- Grafana 默认账号: admin/admin
+- Kafka UI 访问地址: http://localhost:9000
+
+---
+
+## [T012] 前端管理界面 - 2026-03-08
+
+### 完成内容
+- 创建 Vue 3 + TypeScript 项目
+- 实现登录/注册页面
+- 实现布局组件
+- 实现仪表盘页面
+- 配置路由和状态管理
+
+### 修改文件
+- frontend/src/views/login/index.vue
+- frontend/src/views/register/index.vue
+- frontend/src/views/layout/index.vue
+- frontend/src/views/dashboard/index.vue
+- frontend/src/router/index.ts
+- frontend/src/store/user.ts
+
+### 备注
+前端基础框架已完成，后续需要添加策略监控、订单管理等页面
+
+---
+
+## [T003] 数据库表结构初始化 - 2026-03-08
+
+### 完成内容
+- 创建 infra/sql/init.sql 数据库初始化脚本
+- 定义 rebalance_raw 表（富途调仓历史采集原始数据）
+- 定义 rebalance_qs 表（量化策略生成的交易信号）
+- 定义 orders 表（交易订单记录）
+- 定义 positions_snapshot 表（持仓快照记录）
+- 定义 exec_logs 表（系统执行日志）
+- 定义 risk_rules 表（风控规则配置）
+- 定义 accounts 表（账户信息）
+- 定义 system_config 表（系统配置）
+- 定义 sys_user 表（用户表）
+- 创建视图 v_active_orders、v_today_stats
+- 初始化风控规则和系统配置数据
+
+### 修改文件
+- infra/sql/init.sql
+
+### 备注
+- 所有表已创建索引优化查询
+- 使用 JSONB 存储扩展字段
+- 默认管理员账号: admin/admin123
+
+---
+
+## [T004] 量化研究模块（quant-research）基础结构 - 2026-03-08
+
+### 完成内容
+- 创建 quant-research 目录结构
+- 创建 requirements.txt（依赖：backtrader, pandas, kafka, postgresql 等）
+- 创建 src/data/ 数据接入模块（CSV/YFinance/AKShare 加载器、数据清洗）
+- 创建 src/factors/ 因子库（动量、波动率、均值回归因子）
+- 创建 src/strategies/ 策略模块（MA趋势、突破、布林带、RSI、多因子策略）
+- 创建 src/backtest/ 回测框架（BacktestEngine）
+- 创建 src/signals/ 信号输出模块（SignalModel、Kafka Producer）
+- 创建 src/portfolio/ 组合管理模块（信号融合、权重归一化）
+- 创建 config/settings.py 配置管理
+
+### 修改文件
+- quant-research/requirements.txt
+- quant-research/config/settings.py
+- quant-research/src/data/loader.py
+- quant-research/src/data/cleaner.py
+- quant-research/src/factors/*.py
+- quant-research/src/strategies/*.py
+- quant-research/src/backtest/engine.py
+- quant-research/src/signals/*.py
+- quant-research/src/portfolio/allocator.py
+
+### 备注
+- 支持 Yahoo Finance 和 AKShare 数据源
+- 实现了动量、波动率、均值回归三类因子
+- 实现了趋势类和均值回归类策略
+- 信号输出遵循统一协议，可发送到 Kafka
+
+---
+
+## [T005] 交易信号采集模块 - 2026-03-08
+
+### 完成内容
+- 创建 trading-signal Maven 项目
+- 配置 Appium Client 依赖
+- 实现 AppiumDriverManager（驱动生命周期管理）
+- 实现 FutuElementLocator（富途 App 元素定位）
+- 实现 RebalanceParser（调仓历史解析）
+- 实现 SignalKafkaProducer（Kafka 信号发送）
+- 实现 RebalanceRepository（PostgreSQL 持久化）
+- 实现 RebalanceCollector（定时采集任务）
+
+### 修改文件
+- trading-signal/pom.xml
+- trading-signal/src/main/java/com/guanlong/signal/**
+- trading-signal/src/main/resources/application.yml
+
+### 备注
+- 使用 Appium 9.x + UiAutomator2
+- 支持定时采集和手动触发
+- 数据同时写入 PostgreSQL 和 Kafka
+
+---
+
+## [T006] 交易中台核心框架 - 2026-03-08
+
+### 完成内容
+- 创建 trading-platform Maven 项目
+- 配置 Spring Boot 3 + Spring Kafka + MyBatis-Plus
+- 实现 Signal、Order、Position 领域模型
+- 实现 SignalConsumer（Kafka 消费者）
+- 实现 SignalProcessor（信号处理）
+- 实现 EventProducer（交易事件发送）
+
+### 修改文件
+- trading-platform/pom.xml
+- trading-platform/src/main/java/com/guanlong/trading/**
+- trading-platform/src/main/resources/application.yml
+
+### 备注
+- 支持 Prometheus 指标采集
+- 集成 Knife4j API 文档
+
+---
+
+## [T007] 风控模块实现 - 2026-03-08
+
+### 完成内容
+- 创建 RiskRule 领域模型
+- 实现 RiskController（风控控制器）
+- 实现仓位限制规则（单票20%、组合95%）
+- 实现亏损限制规则（日5%、周10%）
+- 实现价格偏离保护（4%）
+- 创建 RiskConfig 配置类
+
+### 修改文件
+- trading-platform/src/main/java/com/guanlong/trading/domain/RiskRule.java
+- trading-platform/src/main/java/com/guanlong/trading/service/RiskController.java
+- trading-platform/src/main/java/com/guanlong/trading/config/RiskConfig.java
+
+---
+
+## [T008] LongPort 券商对接 - 2026-03-08
+
+### 完成内容
+- 创建 BrokerAdapter 接口（券商适配层）
+- 实现 LongPortAdapter（LongPort SDK 集成）
+- 创建 LongPortConfig 配置类
+- 实现行情获取、下单、持仓查询接口
+
+### 修改文件
+- trading-platform/src/main/java/com/guanlong/trading/infra/broker/BrokerAdapter.java
+- trading-platform/src/main/java/com/guanlong/trading/infra/broker/LongPortAdapter.java
+- trading-platform/src/main/java/com/guanlong/trading/config/LongPortConfig.java
+
+### 备注
+- 券商适配器模式，便于扩展其他券商
+
+---
+
+## [T009-T015] 完成记录 - 2026-03-08
+
+### 完成内容
+- **T009**: 信号融合、冲突仲裁、仓位计算
+- **T010**: MA趋势、突破、布林带、多因子策略
+- **T013**: 订单/持仓/风控 API 接口
+- **T014**: Prometheus 指标、Grafana 仪表盘、告警规则
+
+---
+
+## ✅ 所有任务已完成！
+
+| ID | 任务 | 状态 |
+|----|------|------|
+| T002 | 基础设施 Docker Compose 配置 | ✅ |
+| T003 | 数据库表结构初始化 | ✅ |
+| T004 | 量化研究模块基础结构 | ✅ |
+| T005 | 交易信号采集模块 | ✅ |
+| T006 | 交易中台核心框架 | ✅ |
+| T007 | 风控模块实现 | ✅ |
+| T008 | LongPort 券商对接 | ✅ |
+| T009 | 信号处理与差值计算 | ✅ |
+| T010 | 量化策略实现 | ✅ |
+| T011 | 回测框架完善 | ✅ |
+| T012 | 前端管理界面 | ✅ |
+| T013 | API 接口实现 | ✅ |
+| T014 | 监控与告警 | ✅ |
+| T015 | 文档完善 | ✅ |
+
+---
+
+## 问题记录
+
+### 2026-03-08
+- 项目从 longport-platform 重命名为 guanlong-quantitative-platform
+- 需要调整目录结构以适应量化交易平台需求
+- 需要创建 infra/ 和 docs/ 目录
+
+---
+
+## 备注
+
+### 项目里程碑
+1. **Phase 1 - 基础设施** (T001-T003)
+   - 项目结构
+   - Docker 环境
+   - 数据库表
+
+2. **Phase 2 - 核心模块** (T004-T006)
+   - 量化研究模块
+   - 采集模块
+   - 交易中台框架
+
+3. **Phase 3 - 业务实现** (T007-T011)
+   - 风控模块
+   - 券商对接
+   - 信号处理
+   - 策略实现
+   - 回测框架
+
+4. **Phase 4 - 完善优化** (T012-T015)
+   - 前端界面
+   - API 接口
+   - 监控告警
+   - 文档完善

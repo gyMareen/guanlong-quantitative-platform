@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash:*)",
+      "Bash(mkdir:*)",
+      "Bash(gh auth:*)",
+      "Read(//d/workspace/**)",
+      "Bash(mv longport-platform guanlong-quantitative-platform)",
+      "Read(//d//**)",
+      "Bash(cmd //c \"ren workspace\\\\longport-platform guanlong-quantitative-platform\")"
+    ]
+  }
+}

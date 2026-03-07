@@ -1,0 +1,76 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: trading-platform
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:guanlong}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:guanlong-trading}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.guanlong.trading.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+knife4j:
+  enable: true
+  openapi:
+    title: Guanlong Trading Platform API
+    version: 1.0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 风控配置
+risk:
+  max-single-position: 0.20
+  max-total-position: 0.95
+  max-daily-loss: 0.05
+  max-weekly-loss: 0.10
+  max-price-deviation: 0.04
+  min-trade-amount: 20
+
+# 交易配置
+trading:
+  price-deviation: 0.04
+  min-trade-amount: 20
+
+# LongPort 配置
+longport:
+  app-key: ${LONGPORT_APP_KEY:}
+  app-secret: ${LONGPORT_APP_SECRET:}
+  access-token: ${LONGPORT_ACCESS_TOKEN:}
+
+logging:
+  level:
+    com.guanlong.trading: debug

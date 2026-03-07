@@ -1,0 +1,266 @@
+{
+  "project": "guanlong-platform",
+  "version": "1.0.0",
+  "description": "官龙量化一体化交易平台（订单采集 / 量化策略 / 交易中台）",
+  "lastUpdated": "2026-03-08",
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "项目基础结构搭建",
+      "description": "创建项目目录结构、配置文件、基础类",
+      "priority": 1,
+      "dependencies": [],
+      "passes": true,
+      "createdAt": "2026-03-08"
+    },
+    {
+      "id": "T002",
+      "title": "基础设施 Docker Compose 配置",
+      "description": "配置 PostgreSQL、Kafka、Redis、Zookeeper 的 Docker Compose 文件",
+      "priority": 2,
+      "dependencies": ["T001"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "创建 infra/compose/local.yml",
+        "配置 PostgreSQL 服务",
+        "配置 Kafka + Zookeeper 服务",
+        "配置 Redis 服务",
+        "配置网络和卷"
+      ]
+    },
+    {
+      "id": "T003",
+      "title": "数据库表结构初始化",
+      "description": "创建 PostgreSQL 数据库表：rebalance_raw、rebalance_qs、orders、positions_snapshot、exec_logs",
+      "priority": 3,
+      "dependencies": ["T002"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "创建 infra/sql/init.sql",
+        "定义 rebalance_raw 表",
+        "定义 rebalance_qs 表",
+        "定义 orders 表",
+        "定义 positions_snapshot 表",
+        "定义 exec_logs 表",
+        "定义 risk_rules 配置表"
+      ]
+    },
+    {
+      "id": "T004",
+      "title": "量化研究模块（quant-research）基础结构",
+      "description": "创建 Python 量化研究项目结构，包括因子库、策略、回测框架",
+      "priority": 4,
+      "dependencies": ["T001"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "创建 quant-research 目录结构",
+        "创建 requirements.txt",
+        "创建 src/data/ 数据接入模块",
+        "创建 src/factors/ 因子库",
+        "创建 src/strategies/ 策略模块",
+        "创建 src/backtest/ 回测框架",
+        "创建 src/signals/ 信号输出模块"
+      ]
+    },
+    {
+      "id": "T005",
+      "title": "交易信号采集模块（trading-signal）",
+      "description": "创建 Java Appium 采集项目，从富途 App 采集调仓历史",
+      "priority": 5,
+      "dependencies": ["T002", "T003"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "创建 trading-signal Maven 项目",
+        "配置 Appium Client 依赖",
+        "实现 Appium 驱动连接",
+        "实现富途 App 元素定位",
+        "实现调仓历史解析",
+        "实现 Kafka 生产者",
+        "实现 PostgreSQL 写入"
+      ]
+    },
+    {
+      "id": "T006",
+      "title": "交易中台（trading-platform）核心框架",
+      "description": "创建 Spring Boot 交易中台项目，包括 Kafka 消费、风控、下单模块",
+      "priority": 6,
+      "dependencies": ["T002", "T003"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "创建 trading-platform Maven 项目",
+        "配置 Spring Boot 3 + Spring Kafka",
+        "实现 Kafka 消费者（raw/qs topics）",
+        "实现信号领域模型",
+        "实现订单领域模型",
+        "实现 PostgreSQL 仓储层"
+      ]
+    },
+    {
+      "id": "T007",
+      "title": "风控模块实现",
+      "description": "实现交易风控：单票/组合最大仓位、单日最大亏损、连续亏损熔断、价格偏离保护",
+      "priority": 7,
+      "dependencies": ["T006"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "202k-03-08",
+      "steps": [
+        "创建 RiskRule 领域模型",
+        "实现仓位限制规则",
+        "实现亏损限制规则",
+        "实现价格偏离保护",
+        "实现风控规则配置化",
+        "创建 risk_rules 表管理"
+      ]
+    },
+    {
+      "id": "T008",
+      "title": "LongPort 券商对接",
+      "description": "实现 LongPort API 对接，包括行情获取、下单、持仓查询",
+      "priority": 8,
+      "dependencies": ["T006"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "集成 LongPort SDK",
+        "实现行情获取接口",
+        "实现下单接口",
+        "实现持仓查询接口",
+        "实现账户信息查询",
+        "抽象 Broker 适配层"
+      ]
+    },
+    {
+      "id": "T009",
+      "title": "信号处理与差值计算",
+      "description": "实现信号归并、冲突仲裁、差值计算（目标 vs 当前持仓）",
+      "priority": 9,
+      "dependencies": ["T006", "T008"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "实现信号归并逻辑",
+        "实现冲突仲裁策略",
+        "实现持仓差值计算",
+        "实现交易阈值判断（20美元、4%价差）",
+        "实现目标0清仓逻辑"
+      ]
+    },
+    {
+      "id": "T010",
+      "title": "量化策略实现",
+      "description": "实现趋势类（MA/Breakout）、均值回归（Bollinger）、多因子评分策略",
+      "priority": 10,
+      "dependencies": ["T004"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "实现 MA 趋势策略",
+        "实现 Breakout 突破策略",
+        "实现 Bollinger Bands 策略",
+        "实现多因子评分策略",
+        "实现组合层 Score 融合",
+        "实现权重归一化"
+      ]
+    },
+    {
+      "id": "T011",
+      "title": "回测框架完善",
+      "description": "完善 Backtrader 回测框架，包括手续费、滑点、参数搜索",
+      "priority": 11,
+      "dependencies": ["T010"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "封装 Backtrader 引擎",
+        "实现手续费计算",
+        "实现滑点模拟",
+        "实现参数网格搜索",
+        "实现回测快照保存",
+        "实现回测报告生成"
+      ]
+    },
+    {
+      "id": "T012",
+      "title": "前端管理界面",
+      "description": "实现 Vue 3 前端管理界面，包括策略监控、订单管理、持仓查看",
+      "priority": 12,
+      "dependencies": ["T001"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "创建策略监控页面",
+        "创建订单管理页面",
+        "创建持仓查看页面",
+        "创建风控配置页面",
+        "创建系统日志页面"
+      ]
+    },
+    {
+      "id": "T013",
+      "title": "API 接口实现",
+      "description": "实现交易中台 REST API 接口",
+      "priority": 13,
+      "dependencies": ["T006"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "实现订单查询 API",
+        "实现持仓查询 API",
+        "实现信号查询 API",
+        "实现风控配置 API",
+        "实现系统状态 API",
+        "添加 Knife4j API 文档"
+      ]
+    },
+    {
+      "id": "T014",
+      "title": "监控与告警",
+      "description": "实现 Prometheus 指标采集和 Grafana 仪表盘",
+      "priority": 14,
+      "dependencies": ["T006"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "添加 Micrometer 依赖",
+        "实现自定义指标",
+        "配置 Prometheus 抓取",
+        "创建 Grafana 仪表盘",
+        "实现告警规则"
+      ]
+    },
+    {
+      "id": "T015",
+      "title": "文档完善",
+      "description": "完善项目文档：signal-spec.md、risk-rules.md、runbook.md",
+      "priority": 15,
+      "dependencies": ["T003", "T007"],
+      "passes": true,
+      "completedAt": "2026-03-08",
+      "createdAt": "2026-03-08",
+      "steps": [
+        "编写 signal-spec.md 信号协议规范",
+        "编写 risk-rules.md 风险约束规则",
+        "编写 runbook.md 运行手册",
+        "更新 README.md"
+      ]
+    }
+  ]
+}

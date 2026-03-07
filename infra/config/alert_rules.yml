@@ -1,0 +1,91 @@
+groups:
+  - name: trading_alerts
+    rules:
+      # 订单失败率告警
+      - alert: HighOrderFailureRate
+        expr: |
+          (
+            rate(trading_orders_failed_total[5m]) /
+            (rate(trading_orders_total[5m]) + 0.001)
+          ) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "订单失败率过高"
+          description: "最近5分钟订单失败率超过10%，当前值: {{ $value | humanizePercentage }}"
+
+      # 风控拒绝率告警
+      - alert: HighRiskRejectRate
+        expr: rate(trading_risk_reject_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "风控拒绝率过高"
+          description: "最近5分钟风控拒绝率超过0.1/秒"
+
+      # 熔断触发告警
+      - alert: CircuitBreakerTriggered
+        expr: trading_circuit_breaker_active == 1
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "交易熔断已触发"
+          description: "交易系统熔断器已激活，所有交易已暂停"
+
+      # Kafka 消费延迟告警
+      - alert: KafkaConsumerLagHigh
+        expr: kafka_consumer_lag > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Kafka消费延迟过高"
+          description: "Kafka消费者延迟超过1000条消息，当前值: {{ $value }}"
+
+      # 日亏损告警
+      - alert: DailyLossHigh
+        expr: trading_pnl_daily < -50000
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "日亏损金额过高"
+          description: "今日亏损已超过$50,000，当前值: ${{ $value }}"
+
+  - name: system_alerts
+    rules:
+      # 服务健康检查
+      - alert: ServiceDown
+        expr: up{job="trading-platform"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "交易中台服务不可用"
+          description: "trading-platform 服务已宕机超过1分钟"
+
+      # 内存使用率
+      - alert: HighMemoryUsage
+        expr: |
+          (jvm_memory_used_bytes{area="heap"} /
+           jvm_memory_max_bytes{area="heap"}) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM堆内存使用率过高"
+          description: "JVM堆内存使用率超过90%"
+
+      # GC 时间过长
+      - alert: HighGCTime
+        expr: |
+          rate(jvm_gc_pause_seconds_sum[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GC时间占比过高"
+          description: "最近5分钟GC时间占比超过50%"
