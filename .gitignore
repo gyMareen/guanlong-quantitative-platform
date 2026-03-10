@@ -18,12 +18,20 @@ backend/target/
 backend/.mvn/
 backend/mvnw
 backend/mvnw.cmd
+trading-platform/target/
+trading-signal/target/
+*.class
+*.jar
 
 # Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/*.local
+trading-platform-frontend/node_modules/
+trading-platform-frontend/dist/
+**/auto-imports.d.ts
+**/components.d.ts
 
 # Environment
 .env
@@ -33,3 +41,6 @@ frontend/*.local
 # Test
 coverage/
 *.lcov
+screenshot*.png
+flow-*.png
+test-*.png

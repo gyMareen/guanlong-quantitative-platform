@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -84,7 +85,7 @@ public class SignalMerger {
 
         // 计算加权平均权重
         BigDecimal mergedWeight = totalWeight.compareTo(BigDecimal.ZERO) > 0
-                ? weightedSum.divide(totalWeight, 4, BigDecimal.ROUND_HALF_UP)
+                ? weightedSum.divide(totalWeight, 4, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
         // 归一化到 [0, 1]
@@ -92,7 +93,7 @@ public class SignalMerger {
 
         return builder
                 .targetWeight(mergedWeight)
-                .score(totalScore.divide(BigDecimal.valueOf(signals.size()), 4, BigDecimal.ROUND_HALF_UP))
+                .score(totalScore.divide(BigDecimal.valueOf(signals.size()), 4, RoundingMode.HALF_UP))
                 .source("merged")
                 .build();
     }

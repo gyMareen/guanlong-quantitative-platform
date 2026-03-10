@@ -114,25 +114,25 @@ public class TradingController {
     @Operation(summary = "获取订单统计")
     @GetMapping("/orders/statistics")
     public ApiResponse<OrderStatistics> getOrderStatistics() {
-        int todayOrders = orderRepository.selectCount(
+        long todayOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>()
                         .ge(Order::getCreatedAt, LocalDateTime.now().toLocalDate().atStartOfDay())
         );
-        int pendingOrders = orderRepository.selectCount(
+        long pendingOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>().eq(Order::getStatus, "PENDING")
         );
-        int todayFilled = orderRepository.selectCount(
+        long todayFilled = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>()
                         .eq(Order::getStatus, "FILLED")
                         .ge(Order::getUpdatedAt, LocalDateTime.now().toLocalDate().atStartOfDay())
         );
-        int todayRejected = orderRepository.selectCount(
+        long todayRejected = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>()
                         .eq(Order::getStatus, "REJECTED")
                         .ge(Order::getUpdatedAt, LocalDateTime.now().toLocalDate().atStartOfDay())
         );
 
-        return ApiResponse.success(new OrderStatistics(todayOrders, pendingOrders, todayFilled, todayRejected));
+        return ApiResponse.success(new OrderStatistics((int) todayOrders, (int) pendingOrders, (int) todayFilled, (int) todayRejected));
     }
 
     public record OrderStatistics(int todayOrders, int pendingOrders, int todayFilled, int todayRejected) {}

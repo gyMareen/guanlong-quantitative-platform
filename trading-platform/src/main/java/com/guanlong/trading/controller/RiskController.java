@@ -165,14 +165,17 @@ public class RiskController {
             Long triggeredAt
     ) {}
 
-    public record OrderRiskCheck(
-            String symbol,
-            java.math.BigDecimal orderPrice,
-            Integer orderQty,
-            java.math.BigDecimal marketPrice,
-            java.math.BigDecimal targetWeight,
-            java.math.BigDecimal totalEquity
-    ) {}
+    @lombok.Data
+    @lombok.AllArgsConstructor
+    @lombok.NoArgsConstructor
+    public static class OrderRiskCheck {
+        private String symbol;
+        private java.math.BigDecimal orderPrice;
+        private Integer orderQty;
+        private java.math.BigDecimal marketPrice;
+        private java.math.BigDecimal targetWeight;
+        private java.math.BigDecimal totalEquity;
+    }
 
     public record RiskCheckResult(
             boolean passed,

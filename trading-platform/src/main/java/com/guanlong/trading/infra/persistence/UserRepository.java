@@ -9,12 +9,12 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface UserRepository extends BaseMapper<User> {
 
-    @Select("SELECT * FROM users WHERE username = #{username}")
+    @Select("SELECT * FROM sys_user WHERE username = #{username}")
     User findByUsername(@Param("username") String username);
 
-    @Select("SELECT * FROM users WHERE email = #{email}")
+    @Select("SELECT * FROM sys_user WHERE email = #{email}")
     User findByEmail(@Param("email") String email);
 
-    @Select("SELECT COUNT(*) FROM users WHERE username = #{username}")
+    @Select("SELECT COUNT(*) FROM sys_user WHERE username = #{username}")
     int countByUsername(@Param("username") String username);
 }

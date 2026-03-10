@@ -5,10 +5,15 @@ import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -94,13 +99,28 @@ public class FutuElementLocator {
     public void scrollDown() {
         AndroidDriver driver = driverManager.getDriver();
         try {
-            int height = driver.manage().window().getSize().getHeight();
-            int width = driver.manage().window().getSize().getWidth();
-            driver.swipe(
-                    width / 2, (int) (height * 0.8),
-                    width / 2, (int) (height * 0.2),
-                    Duration.ofMillis(500)
-            );
+            Dimension size = driver.manage().window().getSize();
+            int height = size.getHeight();
+            int width = size.getWidth();
+
+            // 使用 W3C Actions API 实现滑动
+            PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+            Sequence swipe = new Sequence(finger, 0);
+
+            // 从屏幕底部 80% 滑动到 20%
+            Point start = new Point(width / 2, (int) (height * 0.8));
+            Point end = new Point(width / 2, (int) (height * 0.2));
+
+            // 移动到起始位置
+            swipe.addAction(finger.createPointerMove(Duration.ofMillis(0), PointerInput.Origin.viewport(), start.x, start.y));
+            // 按下
+            swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+            // 滑动到结束位置
+            swipe.addAction(finger.createPointerMove(Duration.ofMillis(500), PointerInput.Origin.viewport(), end.x, end.y));
+            // 释放
+            swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+
+            driver.perform(Arrays.asList(swipe));
         } catch (Exception e) {
             log.warn("Failed to scroll down", e);
         }

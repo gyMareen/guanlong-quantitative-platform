@@ -1,4 +1,4 @@
-package com.longport.platform.config;
+package com.guanlong.trading.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;

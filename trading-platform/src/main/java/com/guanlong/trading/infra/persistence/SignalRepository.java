@@ -12,32 +12,32 @@ import java.util.List;
 @Mapper
 public interface SignalRepository extends BaseMapper<Signal> {
 
-    @Select("SELECT * FROM signals WHERE timestamp >= #{startDate} AND timestamp < #{endDate} ORDER BY timestamp DESC")
+    @Select("SELECT * FROM rebalance_qs WHERE ts >= #{startDate} AND ts < #{endDate} ORDER BY ts DESC")
     List<Signal> findByDateRange(@Param("startDate") LocalDateTime startDate,
                                   @Param("endDate") LocalDateTime endDate);
 
-    @Select("SELECT * FROM signals WHERE symbol = #{symbol} ORDER BY timestamp DESC LIMIT #{limit}")
+    @Select("SELECT * FROM rebalance_qs WHERE symbol = #{symbol} ORDER BY ts DESC LIMIT #{limit}")
     List<Signal> findBySymbol(@Param("symbol") String symbol, @Param("limit") int limit);
 
-    @Select("SELECT * FROM signals WHERE strategy = #{strategy} ORDER BY timestamp DESC")
+    @Select("SELECT * FROM rebalance_qs WHERE strategy = #{strategy} ORDER BY ts DESC")
     List<Signal> findByStrategy(@Param("strategy") String strategy);
 
-    @Select("SELECT * FROM signals WHERE batch_id = #{batchId} ORDER BY timestamp DESC")
+    @Select("SELECT * FROM rebalance_qs WHERE batch_id = #{batchId} ORDER BY ts DESC")
     List<Signal> findByBatchId(@Param("batchId") String batchId);
 
-    @Select("SELECT * FROM signals WHERE timestamp >= CURRENT_DATE ORDER BY timestamp DESC")
+    @Select("SELECT * FROM rebalance_qs WHERE ts >= CURRENT_DATE ORDER BY ts DESC")
     List<Signal> findTodaySignals();
 
-    @Select("SELECT COUNT(*) FROM signals WHERE timestamp >= CURRENT_DATE")
+    @Select("SELECT COUNT(*) FROM rebalance_qs WHERE ts >= CURRENT_DATE")
     int countTodaySignals();
 
-    @Select("SELECT DISTINCT strategy FROM signals WHERE strategy IS NOT NULL")
+    @Select("SELECT DISTINCT strategy FROM rebalance_qs WHERE strategy IS NOT NULL")
     List<String> findAllStrategies();
 
-    @Select("SELECT DISTINCT source FROM signals WHERE source IS NOT NULL")
+    @Select("SELECT DISTINCT source FROM rebalance_qs WHERE source IS NOT NULL")
     List<String> findAllSources();
 
-    @Select("SELECT * FROM signals WHERE symbol = #{symbol} AND timestamp >= #{startDate} ORDER BY timestamp DESC")
+    @Select("SELECT * FROM rebalance_qs WHERE symbol = #{symbol} AND ts >= #{startDate} ORDER BY ts DESC")
     List<Signal> findBySymbolAndDateRange(@Param("symbol") String symbol,
                                            @Param("startDate") LocalDateTime startDate);
 }

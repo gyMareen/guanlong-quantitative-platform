@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Configuration
-public class MetricsConfig {
+public class ObservationConfig {
 
     // 订单计数器
     @Bean

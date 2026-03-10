@@ -71,17 +71,17 @@ public class SignalController {
     @Operation(summary = "获取信号统计")
     @GetMapping("/statistics")
     public ApiResponse<SignalStatistics> getSignalStatistics() {
-        int todayCount = signalRepository.selectCount(
+        long todayCount = signalRepository.selectCount(
                 new LambdaQueryWrapper<Signal>()
                         .ge(Signal::getTimestamp, LocalDateTime.now().toLocalDate().atStartOfDay())
         );
 
         // 模拟统计数据
-        int executedCount = (int) (todayCount * 0.85);
-        int pendingCount = (int) (todayCount * 0.10);
-        int rejectedCount = todayCount - executedCount - pendingCount;
+        long executedCount = (long) (todayCount * 0.85);
+        long pendingCount = (long) (todayCount * 0.10);
+        long rejectedCount = todayCount - executedCount - pendingCount;
 
-        return ApiResponse.success(new SignalStatistics(todayCount, executedCount, pendingCount, rejectedCount));
+        return ApiResponse.success(new SignalStatistics((int) todayCount, (int) executedCount, (int) pendingCount, (int) rejectedCount));
     }
 
     @Operation(summary = "获取信号详情")

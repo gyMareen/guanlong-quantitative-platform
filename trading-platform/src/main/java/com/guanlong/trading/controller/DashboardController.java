@@ -52,7 +52,7 @@ public class DashboardController {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // 获取今日订单数
-        int todayOrders = orderRepository.selectCount(
+        long todayOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>()
                         .ge(Order::getCreatedAt, LocalDateTime.now().toLocalDate().atStartOfDay())
         );
@@ -61,7 +61,7 @@ public class DashboardController {
         int todaySignals = signalRepository.countTodaySignals();
 
         // 获取待处理订单数
-        int pendingOrders = orderRepository.selectCount(
+        long pendingOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>().eq(Order::getStatus, "PENDING")
         );
 
@@ -71,9 +71,9 @@ public class DashboardController {
                 cashBalance,
                 totalPnL,
                 positions.size(),
-                todayOrders,
+                (int) todayOrders,
                 todaySignals,
-                pendingOrders
+                (int) pendingOrders
         ));
     }
 
@@ -125,18 +125,18 @@ public class DashboardController {
         LocalDateTime todayStart = LocalDateTime.now().toLocalDate().atStartOfDay();
 
         // 今日订单统计
-        int totalOrders = orderRepository.selectCount(
+        long totalOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>().ge(Order::getCreatedAt, todayStart)
         );
-        int filledOrders = orderRepository.selectCount(
+        long filledOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>()
                         .eq(Order::getStatus, "FILLED")
                         .ge(Order::getUpdatedAt, todayStart)
         );
-        int pendingOrders = orderRepository.selectCount(
+        long pendingOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>().eq(Order::getStatus, "PENDING")
         );
-        int rejectedOrders = orderRepository.selectCount(
+        long rejectedOrders = orderRepository.selectCount(
                 new LambdaQueryWrapper<Order>()
                         .eq(Order::getStatus, "REJECTED")
                         .ge(Order::getUpdatedAt, todayStart)
@@ -146,10 +146,10 @@ public class DashboardController {
         int totalSignals = signalRepository.countTodaySignals();
 
         return ApiResponse.success(new TodayStats(
-                totalOrders,
-                filledOrders,
-                pendingOrders,
-                rejectedOrders,
+                (int) totalOrders,
+                (int) filledOrders,
+                (int) pendingOrders,
+                (int) rejectedOrders,
                 totalSignals,
                 totalOrders > 0 ? (double) filledOrders / totalOrders * 100 : 0
         ));

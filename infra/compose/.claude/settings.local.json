@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/workspace/guanlong-quantitative-platform/trading-signal/**)",
+      "Bash(mvn compile:*)"
+    ]
+  }
+}

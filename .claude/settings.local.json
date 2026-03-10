@@ -7,7 +7,57 @@
       "Read(//d/workspace/**)",
       "Bash(mv longport-platform guanlong-quantitative-platform)",
       "Read(//d//**)",
-      "Bash(cmd //c \"ren workspace\\\\longport-platform guanlong-quantitative-platform\")"
+      "Bash(cmd //c \"ren workspace\\\\longport-platform guanlong-quantitative-platform\")",
+      "Bash(winget install:*)",
+      "Bash(export:*)",
+      "Bash(mv longport-platform:*)",
+      "Bash(powershell:*)",
+      "Bash(robocopy longport-platform:*)",
+      "Bash(cmd:*)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform && mvn spring-boot:run 2>&1 | head -100)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform && mvn spring-boot:run -Ddebug=true 2>&1 | grep -A 20 \"MybatisPlusAutoConfiguration\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform && mvn clean compile -q && mvn spring-boot:run 2>&1 | head -60)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-signal && mvn clean compile -q 2>&1 && echo \"编译成功\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-signal && timeout 30 mvn spring-boot:run 2>&1 | head -50 || true)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-signal && mvn clean compile -q && echo \"编译成功\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-signal && timeout 20 mvn spring-boot:run 2>&1 | head -40 || true)",
+      "Bash(netstat -ano | grep 8080 | head -5)",
+      "Bash(taskkill //PID 17136 //F)",
+      "Bash(netstat -ano | grep 8080 || echo \"端口 8080 已释放\")",
+      "Bash(claude mcp:*)",
+      "Bash(cd trading-platform:*)",
+      "Bash(cd trading-platform-frontend:*)",
+      "Bash(docker ps:*)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform-frontend && npm run build 2>&1 | tail -15)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform-frontend && npm run build 2>&1)",
+      "Bash(sleep 15 && curl -s http://localhost:8080/actuator/health 2>/dev/null || echo \"后端未就绪\")",
+      "Bash(sleep 5 && curl -s http://localhost:5173 2>/dev/null | head -20 || echo \"前端未就绪\")",
+      "Bash(curl -s http://localhost:8080/api/auth/test 2>/dev/null || echo \"API 测试\")",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -d '{\"username\":\"testuser\",\"password\":\"Test123456\",\"email\":\"test@example.com\"}' 2>/dev/null)",
+      "Bash(curl -s http://localhost:8080/actuator/health 2>/dev/null | python -m json.tool 2>/dev/null || curl -s http://localhost:8080/actuator/health)",
+      "Bash(docker exec:*)",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/login \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -d '{\"username\":\"admin\",\"password\":\"admin123\"}' 2>/dev/null)",
+      "Bash(python3 -c \"\nimport bcrypt\npassword = 'admin123'\nsalt = bcrypt.gensalt\\(rounds=10\\)\nhashed = bcrypt.hashpw\\(password.encode\\('utf-8'\\), salt\\)\nprint\\(hashed.decode\\('utf-8'\\)\\)\n\" 2>/dev/null || pip install bcrypt -q && python3 -c \"\nimport bcrypt\npassword = 'admin123'\nsalt = bcrypt.gensalt\\(rounds=10\\)\nhashed = bcrypt.hashpw\\(password.encode\\('utf-8'\\), salt\\)\nprint\\(hashed.decode\\('utf-8'\\)\\)\n\")",
+      "Bash(htpasswd -nbBC 10 admin admin123 2>/dev/null || echo \"htpasswd 不可用\")",
+      "Bash(curl -s http://localhost:8080/actuator/health 2>/dev/null || echo \"后端未运行\")",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -d '{\"username\":\"testuser\",\"password\":\"Test123456\",\"nickname\":\"测试用户\",\"email\":\"test@example.com\"}' 2>/dev/null)",
+      "Bash(netstat -tlnp 2>/dev/null | grep 8080 || ss -tlnp 2>/dev/null | grep 8080)",
+      "Bash(tasklist | grep -i java 2>/dev/null || echo \"无 Java 进程\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform && mvn exec:java -Dexec.mainClass=\"org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder\" -Dexec.args=\"admin123\" -q 2>&1 || echo \"直接使用 Java\")",
+      "Bash(taskkill //F //PID 27500 2>/dev/null; taskkill //F //PID 17620 2>/dev/null; taskkill //F //PID 4704 2>/dev/null; taskkill //F //PID 29348 2>/dev/null; taskkill //F //PID 14676 2>/dev/null; echo \"Java 进程已终止\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform-frontend && npx puppeteer screenshot http://localhost:5176 --viewport=1920,1080 --output=screenshot-login.png 2>&1 || echo \"尝试其他方式\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform-frontend && npx --yes puppeteer screenshot http://localhost:5176 --viewport=1920,1080 --output=screenshot-login.png 2>&1)",
+      "Bash(ls -la D:/workspace/guanlong-quantitative-platform/trading-platform-frontend/screenshot*.png 2>/dev/null || echo \"截图文件不存在\")",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform-frontend && npm install puppeteer --save-dev 2>&1 | tail -10)",
+      "Bash(cd D:/workspace/guanlong-quantitative-platform/trading-platform-frontend && node screenshot.js 2>&1)"
     ]
+  },
+  "mcpServers": {
+    "browsermcp": {
+      "command": "npx",
+      "args": [
+        "@browsermcp/mcp@latest"
+      ]
+    }
   }
 }
