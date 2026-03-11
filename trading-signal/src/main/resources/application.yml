@@ -30,13 +30,14 @@ appium:
   platform-name: Android
   automation-name: UiAutomator2
   device-name: ${DEVICE_NAME:emulator-5554}
-  app-package: com.futuadvanced.FutuOpenD
-  app-activity: .SplashActivity
+  app-package: cn.futu.trader
+  app-activity: cn.futu.trader.main.activity.MainActivity
   no-reset: true
   new-command-timeout: 300
 
 # 采集配置
 collector:
+  enabled: ${COLLECTOR_ENABLED:true}
   interval: ${COLLECT_INTERVAL:15000}
   retry-count: ${COLLECT_RETRY_COUNT:3}
   element-timeout: 10

@@ -34,35 +34,63 @@ public class RebalanceParser {
     }
 
     private RebalanceData parseItem(WebElement item) {
-        // 解析单个调仓记录
-        // 需要根据实际的 UI 结构调整
-
-        String name = getText(item, "stock_name");
-        String symbol = extractSymbol(name);
-        String curAllocStr = getText(item, "current_allocation");
-        String tarAllocStr = getText(item, "target_allocation");
-        String refPriceStr = getText(item, "ref_price");
-        String date = getText(item, "date_text");
+        String name = getText(item, "cn.futu.trader:id/stock_name_tv");
+        String symbol = getText(item, "cn.futu.trader:id/stock_code_tv");
+        String changeText = getText(item, "cn.futu.trader:id/position_change_content_tv");
+        String priceText = getText(item, "cn.futu.trader:id/position_price_tv");
 
         if (StrUtil.isEmpty(symbol)) {
             return null;
         }
 
+        // 解析 "0.00%->19.73%" 格式
+        BigDecimal[] allocations = parseAllocationChange(changeText);
+        BigDecimal refPrice = extractPrice(priceText);
+
         return RebalanceData.builder()
                 .name(name)
-                .symbol(symbol)
-                .allocationCur(parsePercent(curAllocStr))
-                .allocationTar(parsePercent(tarAllocStr))
-                .refPrice(parsePrice(refPriceStr))
-                .date(date)
+                .symbol(symbol + ".US")
+                .allocationCur(allocations[0])
+                .allocationTar(allocations[1])
+                .refPrice(refPrice)
                 .source(SOURCE)
                 .build();
     }
 
-    private String getText(WebElement parent, String id) {
+    private BigDecimal[] parseAllocationChange(String text) {
+        if (StrUtil.isEmpty(text)) {
+            return new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO};
+        }
+        try {
+            String[] parts = text.split("->");
+            BigDecimal cur = parsePercent(parts[0].trim());
+            BigDecimal tar = parsePercent(parts[1].trim());
+            return new BigDecimal[]{cur, tar};
+        } catch (Exception e) {
+            return new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO};
+        }
+    }
+
+    private BigDecimal extractPrice(String text) {
+        if (StrUtil.isEmpty(text)) {
+            return null;
+        }
+        try {
+            // "参考成交价 688.200" -> 688.200
+            String[] parts = text.split("\\s+");
+            if (parts.length > 1) {
+                return new BigDecimal(parts[1]);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse price: {}", text);
+        }
+        return null;
+    }
+
+    private String getText(WebElement parent, String resourceId) {
         try {
             WebElement element = parent.findElement(
-                    io.appium.java_client.AppiumBy.id(id)
+                    io.appium.java_client.AppiumBy.id(resourceId)
             );
             return element.getText();
         } catch (Exception e) {

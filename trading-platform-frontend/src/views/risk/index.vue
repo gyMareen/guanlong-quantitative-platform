@@ -148,11 +148,14 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getRiskRules, getRiskConfig, getCircuitBreakerStatus, triggerCircuitBreaker, resetCircuitBreaker } from '@/api/risk'
 
-const circuitBreaker = reactive({
-  active: false,
-  reason: '',
-  triggeredAt: ''
+const circuitBreaker = reactive<{
+  active: boolean
+  reason?: string
+  triggeredAt?: number
+}>({
+  active: false
 })
 
 const riskStats = reactive({
@@ -178,15 +181,38 @@ const riskLogs = ref([
 ])
 
 const fetchRiskConfig = async () => {
-  // TODO: 调用 API
+  try {
+    const [configRes, rulesRes, breakerRes] = await Promise.all([
+      getRiskConfig(),
+      getRiskRules(),
+      getCircuitBreakerStatus()
+    ])
+
+    // 更新风控配置
+    Object.assign(riskConfig, configRes)
+
+    // 更新风控规则统计
+    riskStats.totalOrders = rulesRes.length
+    riskStats.passedOrders = rulesRes.filter(r => r.enabled).length
+    riskStats.rejectedOrders = rulesRes.filter(r => !r.enabled).length
+    riskStats.rejectRate = rulesRes.length > 0 ? Number(((rulesRes.filter(r => !r.enabled).length / rulesRes.length) * 100).toFixed(1)) : 0
+
+    // 更新熔断状态
+    Object.assign(circuitBreaker, breakerRes)
+  } catch (error) {
+    ElMessage.error('获取风控配置失败')
+    console.error(error)
+  }
 }
 
 const saveConfig = async () => {
   try {
-    // TODO: 调用 API
-    ElMessage.success('配置保存成功')
-  } catch {
+    // 这里可以添加保存风控配置的 API 调用
+    // 目前 RiskConfig 是后端配置文件，需要通过其他方式更新
+    ElMessage.success('配置保存成功（演示模式）')
+  } catch (error) {
     ElMessage.error('保存失败')
+    console.error(error)
   }
 }
 
@@ -198,31 +224,39 @@ const triggerBreaker = async () => {
       inputPattern: /.+/,
       inputErrorMessage: '请输入熔断原因'
     })
-    // TODO: 调用 API
+    // 调用触发熔断 API
+    await triggerCircuitBreaker(value)
     circuitBreaker.active = true
     circuitBreaker.reason = value
-    circuitBreaker.triggeredAt = new Date().toLocaleString()
+    circuitBreaker.triggeredAt = Date.now()
     ElMessage.warning('熔断已触发')
-  } catch {
-    // 用户取消
+  } catch (error: any) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    }
+    // 用户取消不处理
   }
 }
 
 const resetBreaker = async () => {
   try {
     await ElMessageBox.confirm('确认解除熔断？', '提示', { type: 'warning' })
-    // TODO: 调用 API
+    // 调用重置熔断 API
+    await resetCircuitBreaker()
     circuitBreaker.active = false
-    circuitBreaker.reason = ''
-    circuitBreaker.triggeredAt = ''
+    delete circuitBreaker.reason
+    delete circuitBreaker.triggeredAt
     ElMessage.success('熔断已解除')
-  } catch {
-    // 用户取消
+  } catch (error: any) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    }
+    // 用户取消不处理
   }
 }
 
-const getLevelType = (level: string) => {
-  const types: Record<string, string> = {
+const getLevelType = (level: string): 'success' | 'primary' | 'warning' | 'info' | 'danger' => {
+  const types: Record<string, 'success' | 'primary' | 'warning' | 'info' | 'danger'> = {
     INFO: 'info',
     WARN: 'warning',
     ERROR: 'danger'

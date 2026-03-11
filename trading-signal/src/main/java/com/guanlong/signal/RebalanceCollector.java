@@ -8,6 +8,8 @@ import com.guanlong.signal.kafka.SignalKafkaProducer;
 import com.guanlong.signal.parser.RebalanceData;
 import com.guanlong.signal.parser.RebalanceParser;
 import com.guanlong.signal.persistence.RebalanceRepository;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebElement;
@@ -33,6 +35,23 @@ public class RebalanceCollector {
     private final CollectorConfig config;
 
     private volatile boolean collecting = false;
+
+    @PostConstruct
+    public void init() {
+        log.info("Initializing Appium driver...");
+        try {
+            driverManager.initDriver();
+            log.info("Appium driver initialized successfully");
+        } catch (Exception e) {
+            log.error("Failed to initialize driver on startup", e);
+        }
+    }
+
+    @PreDestroy
+    public void destroy() {
+        log.info("Shutting down collector...");
+        driverManager.quitDriver();
+    }
 
     @Scheduled(fixedDelayString = "${collector.interval:15000}")
     public void collect() {

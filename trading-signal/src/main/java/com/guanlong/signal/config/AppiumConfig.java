@@ -13,13 +13,13 @@ public class AppiumConfig {
     private int port = 4723;
     private String platformName = "Android";
     private String automationName = "UiAutomator2";
-    private String deviceName = "emulator-5554";
-    private String appPackage = "com.futuadvanced.FutuOpenD";
-    private String appActivity = ".SplashActivity";
+    private String deviceName = "23127PN0CC";
+    private String appPackage = "cn.futu.trader";
+    private String appActivity = "cn.futu.trader.main.activity.MainActivity";
     private boolean noReset = true;
     private int newCommandTimeout = 300;
 
     public String getAppiumServerUrl() {
-        return String.format("http://%s:%d/wd/hub", host, port);
+        return String.format("http://%s:%d", host, port);
     }
 }

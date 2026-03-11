@@ -37,17 +37,14 @@ public class FutuElementLocator {
         AndroidDriver driver = driverManager.getDriver();
 
         try {
-            // 等待调仓历史列表加载
             Thread.sleep(2000);
 
-            // 查找调仓历史 RecyclerView
             WebElement recyclerView = driver.findElement(
-                    AppiumBy.id(REBALANCE_HISTORY_RV)
+                    AppiumBy.id("cn.futu.trader:id/quote_portfolio_position_history_rv")
             );
 
-            // 获取所有行
             List<WebElement> items = recyclerView.findElements(
-                    AppiumBy.className("android.widget.LinearLayout")
+                    AppiumBy.xpath(".//android.view.ViewGroup[@clickable='true']")
             );
 
             log.info("Found {} rebalance history items", items.size());
@@ -75,24 +72,36 @@ public class FutuElementLocator {
         try {
             log.info("Navigating to rebalance history page...");
 
-            // 1. 点击行情 Tab
-            // 2. 点击持仓
-            // 3. 点击调仓历史
+            // 检查是否已在调仓历史页面
+            if (isOnRebalanceHistoryPage()) {
+                log.info("Already on rebalance history page");
+                return;
+            }
 
-            // 这里需要根据实际的 App 导航流程实现
-            // 示例代码：
-            // driver.findElement(AppiumBy.id("tab_quote")).click();
-            // Thread.sleep(1000);
-            // driver.findElement(AppiumBy.id("portfolio")).click();
-            // Thread.sleep(1000);
-            // driver.findElement(AppiumBy.id("position_history")).click();
+            // 点击消息通知中的调仓记录进入调仓历史
+            WebElement rebalanceMsg = driver.findElement(
+                AppiumBy.xpath("//cn.futu.uikit.widget.textview.FtTextView[contains(@text, '组合调仓')]")
+            );
+            rebalanceMsg.click();
+            Thread.sleep(1500);
 
-            Thread.sleep(2000);
             log.info("Navigated to rebalance history page");
 
         } catch (Exception e) {
             log.error("Failed to navigate to rebalance history", e);
             throw new RuntimeException("Failed to navigate to rebalance history", e);
+        }
+    }
+
+    private boolean isOnRebalanceHistoryPage() {
+        try {
+            AndroidDriver driver = driverManager.getDriver();
+            WebElement title = driver.findElement(
+                AppiumBy.xpath("//cn.futu.uikit.widget.textview.FtTextView[@text='调仓历史']")
+            );
+            return title != null;
+        } catch (Exception e) {
+            return false;
         }
     }
 

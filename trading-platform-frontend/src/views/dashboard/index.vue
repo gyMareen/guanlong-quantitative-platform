@@ -83,6 +83,38 @@
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getOverview, getTodayStats, getAccountStats } from '@/api/dashboard'
+import type { DashboardOverview, TodayStats, AccountStats } from '@/api/types'
+
+const loading = ref(false)
+const overview = reactive<Partial<DashboardOverview>>({})
+const todayStats = reactive<Partial<TodayStats>>({})
+const accountStats = reactive<Partial<AccountStats>>({})
+
+const fetchDashboardData = async () => {
+  loading.value = true
+  try {
+    const [overviewRes, todayRes, accountRes] = await Promise.all([
+      getOverview(),
+      getTodayStats(),
+      getAccountStats()
+    ])
+    Object.assign(overview, overviewRes)
+    Object.assign(todayStats, todayRes)
+    Object.assign(accountStats, accountRes)
+  } catch (error) {
+    ElMessage.error('获取仪表盘数据失败')
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchDashboardData()
+})
 </script>
 
 <style scoped lang="scss">

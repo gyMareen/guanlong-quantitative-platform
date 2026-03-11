@@ -19,9 +19,9 @@
               <span class="value">${{ accountInfo.cashBalance?.toFixed(2) || '0.00' }}</span>
             </div>
             <div class="overview-item">
-              <span class="label">今日盈亏</span>
-              <span :class="['value', { profit: accountInfo.todayPnL > 0, loss: accountInfo.todayPnL < 0 }]">
-                {{ accountInfo.todayPnL >= 0 ? '+' : '' }}${{ accountInfo.todayPnL?.toFixed(2) || '0.00' }}
+              <span class="label">总盈亏</span>
+              <span :class="['value', { profit: accountInfo.totalPnL > 0, loss: accountInfo.totalPnL < 0 }]">
+                {{ accountInfo.totalPnL >= 0 ? '+' : '' }}${{ accountInfo.totalPnL?.toFixed(2) || '0.00' }}
               </span>
             </div>
           </div>
@@ -97,34 +97,18 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
-
-interface Position {
-  symbol: string
-  name: string
-  qty: number
-  availableQty: number
-  costPrice: number
-  mktPrice: number
-  marketValue: number
-  pnl: number
-  pnlRatio: number
-  weight: number
-}
-
-interface AccountInfo {
-  totalEquity: number
-  positionValue: number
-  cashBalance: number
-  todayPnL: number
-}
+import { getPositions, getAccountOverview } from '@/api/position'
+import type { Position, AccountOverview } from '@/api/types'
 
 const loading = ref(false)
 const positions = ref<Position[]>([])
-const accountInfo = reactive<AccountInfo>({
+const accountInfo = reactive<AccountOverview>({
   totalEquity: 0,
   positionValue: 0,
   cashBalance: 0,
-  todayPnL: 0
+  totalPnL: 0,
+  positionRatio: 0,
+  positionCount: 0
 })
 
 const chartRef = ref<HTMLElement>()
@@ -133,27 +117,21 @@ let chart: echarts.ECharts | null = null
 const fetchPositions = async () => {
   loading.value = true
   try {
-    // TODO: 调用 API
-    // const res = await positionApi.getPositions()
-    // positions.value = res.data
+    // 调用 API 获取持仓数据
+    const [positionsRes, overviewRes] = await Promise.all([
+      getPositions(),
+      getAccountOverview()
+    ])
 
-    // 模拟数据
-    positions.value = [
-      { symbol: 'AAPL.US', name: '苹果', qty: 100, availableQty: 100, costPrice: 180.00, mktPrice: 185.50, marketValue: 18550, pnl: 550, pnlRatio: 0.0306, weight: 0.25 },
-      { symbol: 'MSFT.US', name: '微软', qty: 50, availableQty: 50, costPrice: 380.00, mktPrice: 395.00, marketValue: 19750, pnl: 750, pnlRatio: 0.0196, weight: 0.27 },
-      { symbol: 'GOOGL.US', name: '谷歌', qty: 30, availableQty: 30, costPrice: 140.00, mktPrice: 135.50, marketValue: 4065, pnl: -135, pnlRatio: -0.0321, weight: 0.05 },
-      { symbol: 'TSLA.US', name: '特斯拉', qty: 80, availableQty: 80, costPrice: 200.00, mktPrice: 185.00, marketValue: 14800, pnl: -1200, pnlRatio: -0.075, weight: 0.20 },
-      { symbol: 'NVDA.US', name: '英伟达', qty: 40, availableQty: 40, costPrice: 800.00, mktPrice: 890.00, marketValue: 35600, pnl: 3600, pnlRatio: 0.1125, weight: 0.23 }
-    ]
+    positions.value = positionsRes
 
-    accountInfo.totalEquity = 92765
-    accountInfo.positionValue = 92765
-    accountInfo.cashBalance = 5000
-    accountInfo.todayPnL = 3565
+    // 更新账户概览
+    Object.assign(accountInfo, overviewRes)
 
     updateChart()
   } catch (error) {
     ElMessage.error('获取持仓信息失败')
+    console.error(error)
   } finally {
     loading.value = false
   }

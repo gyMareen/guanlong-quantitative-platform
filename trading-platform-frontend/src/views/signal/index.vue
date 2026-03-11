@@ -124,28 +124,18 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-
-interface Signal {
-  timestamp: string
-  symbol: string
-  action: string
-  targetWeight: number
-  score: number
-  strategy: string
-  source: string
-  status: string
-  note: string
-}
+import { getSignals, getSignalStatistics } from '@/api/signal'
+import type { Signal, SignalStatistics } from '@/api/types'
 
 const loading = ref(false)
 const filterStrategy = ref('')
 const signals = ref<Signal[]>([])
 
-const signalStats = reactive({
-  todayCount: 45,
-  executedCount: 38,
-  pendingCount: 5,
-  rejectedCount: 2
+const signalStats = reactive<Partial<SignalStatistics>>({
+  todayCount: 0,
+  executedCount: 0,
+  pendingCount: 0,
+  rejectedCount: 0
 })
 
 const pagination = reactive({
@@ -157,15 +147,23 @@ const pagination = reactive({
 const fetchSignals = async () => {
   loading.value = true
   try {
-    // TODO: 调用 API
-    signals.value = [
-      { timestamp: '2026-03-08 10:30:00', symbol: 'AAPL.US', action: 'BUY', targetWeight: 0.15, score: 0.85, strategy: 'multi_factor', source: 'quant', status: 'EXECUTED', note: '' },
-      { timestamp: '2026-03-08 10:25:00', symbol: 'TSLA.US', action: 'SELL', targetWeight: 0.05, score: -0.45, strategy: 'ma_trend', source: 'quant', status: 'PENDING', note: '等待执行' },
-      { timestamp: '2026-03-08 10:20:00', symbol: 'MSFT.US', action: 'BUY', targetWeight: 0.10, score: 0.62, strategy: 'breakout', source: 'quant', status: 'EXECUTED', note: '' },
-      { timestamp: '2026-03-08 10:15:00', symbol: 'GOOGL.US', action: 'CLOSE', targetWeight: 0, score: -0.75, strategy: 'bollinger', source: 'quant', status: 'REJECTED', note: '风控拒绝：价格偏离过大' }
-    ]
-  } catch {
+    // 调用 API 获取信号数据
+    const [signalsRes, statsRes] = await Promise.all([
+      getSignals({
+        page: pagination.page,
+        size: pagination.size,
+        symbol: filterStrategy.value ? undefined : undefined,
+        strategy: filterStrategy.value || undefined
+      }),
+      getSignalStatistics()
+    ])
+
+    signals.value = signalsRes.records
+    pagination.total = signalsRes.total
+    Object.assign(signalStats, statsRes)
+  } catch (error) {
     ElMessage.error('获取信号列表失败')
+    console.error(error)
   } finally {
     loading.value = false
   }
@@ -176,8 +174,8 @@ const refreshSignals = () => {
   fetchSignals()
 }
 
-const getActionType = (action: string) => {
-  const types: Record<string, string> = {
+const getActionType = (action: string): 'success' | 'primary' | 'warning' | 'info' | 'danger' => {
+  const types: Record<string, 'success' | 'primary' | 'warning' | 'info' | 'danger'> = {
     BUY: 'success',
     SELL: 'danger',
     CLOSE: 'warning',
@@ -186,8 +184,8 @@ const getActionType = (action: string) => {
   return types[action] || 'info'
 }
 
-const getStatusType = (status: string) => {
-  const types: Record<string, string> = {
+const getStatusType = (status: string): 'success' | 'primary' | 'warning' | 'info' | 'danger' => {
+  const types: Record<string, 'success' | 'primary' | 'warning' | 'info' | 'danger'> = {
     PENDING: 'warning',
     EXECUTED: 'success',
     REJECTED: 'danger'

@@ -116,19 +116,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
-
-interface Order {
-  id: number
-  symbol: string
-  side: string
-  orderType: string
-  qty: number
-  price: number
-  filledQty: number
-  status: string
-  createdAt: string
-  errorMsg: string
-}
+import { getOrders, cancelOrder as cancelOrderApi } from '@/api/trading'
+import type { Order } from '@/api/types'
 
 const loading = ref(false)
 const orders = ref<Order[]>([])
@@ -148,41 +137,22 @@ const pagination = reactive({
 const fetchOrders = async () => {
   loading.value = true
   try {
-    // TODO: 调用 API
-    // const res = await orderApi.getOrders({ ...searchForm, ...pagination })
-    // orders.value = res.data
-    // pagination.total = res.total
+    // 调用 API 获取订单数据
+    const params = {
+      page: pagination.page,
+      size: pagination.size,
+      symbol: searchForm.symbol || undefined,
+      status: searchForm.status || undefined,
+      startDate: searchForm.dateRange?.[0] ? dayjs(searchForm.dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      endDate: searchForm.dateRange?.[1] ? dayjs(searchForm.dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : undefined
+    }
 
-    // 模拟数据
-    orders.value = [
-      {
-        id: 1,
-        symbol: 'AAPL.US',
-        side: 'BUY',
-        orderType: 'LIMIT',
-        qty: 100,
-        price: 185.50,
-        filledQty: 100,
-        status: 'FILLED',
-        createdAt: '2026-03-08 10:30:00',
-        errorMsg: ''
-      },
-      {
-        id: 2,
-        symbol: 'TSLA.US',
-        side: 'SELL',
-        orderType: 'MARKET',
-        qty: 50,
-        price: 0,
-        filledQty: 0,
-        status: 'PENDING',
-        createdAt: '2026-03-08 11:00:00',
-        errorMsg: ''
-      }
-    ]
-    pagination.total = 2
+    const res = await getOrders(params)
+    orders.value = res.records
+    pagination.total = res.total
   } catch (error) {
     ElMessage.error('获取订单列表失败')
+    console.error(error)
   } finally {
     loading.value = false
   }
@@ -218,16 +188,20 @@ const cancelOrder = async (order: Order) => {
     await ElMessageBox.confirm(`确认取消订单 #${order.id}？`, '提示', {
       type: 'warning'
     })
-    // TODO: 调用取消订单 API
+    // 调用取消订单 API
+    await cancelOrderApi(order.id)
     ElMessage.success('订单已取消')
     fetchOrders()
-  } catch {
-    // 用户取消
+  } catch (error: any) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    }
+    // 用户取消不处理
   }
 }
 
-const getStatusType = (status: string) => {
-  const types: Record<string, string> = {
+const getStatusType = (status: string): 'success' | 'primary' | 'warning' | 'info' | 'danger' => {
+  const types: Record<string, 'success' | 'primary' | 'warning' | 'info' | 'danger'> = {
     PENDING: 'info',
     SUBMITTED: 'warning',
     PARTIAL_FILLED: 'warning',
